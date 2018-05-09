@@ -5,8 +5,9 @@
  * Date: 2018/5/9
  * Time: 上午11:28
  */
+namespace SensitiveService;
 
-class sensitiveService{
+class SensitiveWord{
 
     public function validate($content,$level=null)
     {

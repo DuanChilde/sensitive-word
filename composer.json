@@ -6,5 +6,11 @@
             "email": "673857675@qq.com"
         }
     ],
-    "require": {}
+    "require": {},
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "SensitiveService\\": "src/"
+        }
+    }
 }
