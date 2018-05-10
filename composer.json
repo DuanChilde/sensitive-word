@@ -6,7 +6,9 @@
             "email": "673857675@qq.com"
         }
     ],
-    "require": {},
+    "require": {
+        "phpoffice/phpspreadsheet": "dev-master"
+    },
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
