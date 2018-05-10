@@ -38,8 +38,10 @@ composer config secure-http false
 
 移除
 composer remove "duanwei/sensitive-word" 
+
 更新
 composer update "duanwei/sensitive-word" 
+
 引入
 composer require --prefer-dist "duanwei/sensitive-word"
 ```
