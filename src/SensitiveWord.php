@@ -6,8 +6,8 @@
  * Time: 上午11:28
  */
 namespace SensitiveService;
-use PhpOffice\PhpSpreadsheet\IOFactory;
 
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class SensitiveWord
 {
@@ -91,7 +91,7 @@ class SensitiveWord
         $this->isLoaded = count($diffFile)>0 ? true : false;
 
         ini_set('memory_limit','128M');
-        require_once __DIR__.'/../vendor/autoload.php';
+
         foreach($diffFile as $file)
         {
             $spreadsheet = IOFactory::load($this->wordLib[$file]);
