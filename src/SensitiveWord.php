@@ -169,6 +169,11 @@ class SensitiveWord
 
     }
 
+    public function clear()
+    {
+        $this->redis->del($this->redis->keys(self::REDIS_PREFIX."*"));
+    }
+
 
 
 }

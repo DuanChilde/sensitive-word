@@ -19,6 +19,8 @@ $s->loadWordLib();  //加载词库
 var_dump($s->validate("法轮功,123"));
 var_dump($s->getWarningLevel());
 
+//$s->clear();
+
 
 
 
