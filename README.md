@@ -1,4 +1,33 @@
-### 使用方法
+### composer.json文件配置
+
+```
+ "repositories": [
+        {
+            "type": "composer",
+            "url": "https://packagist.phpcomposer.com"
+        },
+        {
+            "type": "package",
+            "package": {
+                "name": "duanwei/sensitive-word",
+                "version": "0.0.1",
+                "type": "package",
+                "source": {
+                    "url": "http://git.tdf.ministudy.com/duanwei/sensitive-word.git",
+                    "type": "git",
+                    "reference": "master"
+                },
+                "autoload": {
+                    "psr-4": {
+                        "SensitiveService\\": "src/"
+                    }
+                }
+            }
+        }
+    ]
+```
+
+### 引入
 ```
 composer require --prefer-dist "duanwei/sensitive-word"
 ```
