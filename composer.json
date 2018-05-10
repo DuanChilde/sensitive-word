@@ -9,7 +9,7 @@
     "require": {
         "phpoffice/phpspreadsheet": "dev-master"
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "0.0.1",
     "autoload": {
         "psr-4": {
             "SensitiveService\\": "src/"
