@@ -37,6 +37,8 @@
 ```
 composer config secure-http false
 
+composer remove "duanwei/sensitive-word" 
+
 composer require --prefer-dist "duanwei/sensitive-word"
 ```
 
