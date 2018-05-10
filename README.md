@@ -23,10 +23,8 @@
                     }
                 },
                 "require": {
-                    "phpoffice/phpspreadsheet": "*"
-                },
-                "config": {
-                    "secure-http": false
+                    "phpoffice/phpspreadsheet": "*",
+                    "predis/predis": "^1.1"
                 }
             }
         }
