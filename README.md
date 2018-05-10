@@ -1,4 +1,4 @@
-### 1.composer.json文件配置
+### 1. composer.json文件配置
 
 ```
  "repositories": [
@@ -27,12 +27,12 @@
     ]
 ```
 
-### 2.安装
+### 2. 安装
 ```
 composer require --prefer-dist "duanwei/sensitive-word"
 ```
 
-### 3.使用
+### 3. 使用
 ```
 use SensitiveService\SensitiveWord;
 
