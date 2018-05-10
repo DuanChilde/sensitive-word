@@ -7,12 +7,16 @@
         }
     ],
     "require": {
-        "phpoffice/phpspreadsheet": "dev-master"
+        "phpoffice/phpspreadsheet": "dev-master",
+        "predis/predis": "^1.1"
     },
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
             "SensitiveService\\": "src/"
         }
+    },
+    "config": {
+        "secure-http": false
     }
 }

@@ -8,32 +8,47 @@
 namespace SensitiveService;
 
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use Predis\Client;
 
 class SensitiveWord
 {
     private static $instance;
+    private $redis;
+
     protected $warningLevel;    //警告等级
     protected $matches;    //匹配到的词
     protected $wordLib = [];    //全部敏感词文件
     protected $loadedLib = [];  //已经加载的敏感词文件
     protected $words = [];  //所有的词
-    protected $isLoaded = false;
 
     const LEVEL_ONE = 1;    //一级敏感词
     const LEVEL_TWO = 2;    //二级敏感词
     const LEVEL_THREE = 3;  //三级敏感词
 
-    private function __construct()
+    const REDIS_PREFIX = "sensitive_word:";
+    const LOADED_LIB = "loaded_lib";
+
+
+
+    private function __construct($config)
     {
+        if(!isset($config['hostname']) || !isset($config['port']) || !isset($config['database'])){
+            throw new \Exception("请加载redis配置");
+        }
+        $this->redis = new Client([
+            'host' => $config['hostname'],
+            'port' => $config['port'],
+            'database' => $config['database'],
+        ]);
     }
 
     private function __clone()
     {
     }
 
-    public static function getInstance(){
+    public static function getInstance($config){
         if (!self::$instance instanceof self) {
-            self::$instance = new self();
+            self::$instance = new self($config);
         }
         return self::$instance;
      }
@@ -41,9 +56,6 @@ class SensitiveWord
 
     public function validate($content, $level = null)
     {
-        if(!$this->isLoaded){
-            throw new \Exception("没有加载词库");
-        }
         if ($level && !$this->matchByLevel($content,$level)) {
             return false;
         } else {
@@ -76,45 +88,68 @@ class SensitiveWord
         return $this->warningLevel;
     }
 
-    public function loadWordLib($filePath=[],$rules=[])
+    public function loadWordLib($filePath=[])
     {
-        $filePath = is_string($filePath) ? [$filePath=>$filePath] : [];
+        $filePath = is_string($filePath) ? [$filePath] : [];
         if(!empty($filePath))   //加载自定义敏感词库
         {
-            $filePath = array_filter(array_map(function($v){if(file_exists($v)){return $v;}},$filePath));
-            $this->wordLib = array_merge($this->wordLib,$filePath);
+            foreach($filePath as $file)
+            {
+                if(!file_exists($file)){
+                    continue;
+                }
+                if(!$this->redis->sismember(self::REDIS_PREFIX.self::LOADED_LIB,$file))
+                {
+                    $this->redis->sadd(self::REDIS_PREFIX.self::LOADED_LIB,$file);
+                    $this->wordLib[]= $file;
+                }
+            }
         }else{  //加载本地敏感词库
             $this->getLocalLib();
         }
-
-        $diffFile = array_diff(array_unique($this->getLoadedLib()),$this->loadedLib);
-        $this->isLoaded = count($diffFile)>0 ? true : false;
+        $diffFile = array_diff(array_unique($this->wordLib),$this->getLoadedLib());
 
         ini_set('memory_limit','128M');
-
-        foreach($diffFile as $file)
+        if($diffFile)
         {
-            $spreadsheet = IOFactory::load($this->wordLib[$file]);
-            $count = $spreadsheet->getSheetCount();
-            for($i=0;$i<$count;$i++)
+            foreach($diffFile as $file)
             {
-                $sheetData = $spreadsheet->getSheet($i)->toArray(null, true, true, true);
-                array_shift($sheetData);
-                if(empty($rules)){
+                $spreadsheet = IOFactory::load($file);
+                $count = $spreadsheet->getSheetCount();
+                for($i=0;$i<$count;$i++)
+                {
+                    $sheetData = $spreadsheet->getSheet($i)->toArray(null, true, true, true);
+                    array_shift($sheetData);
+
+                    $this->redis->sadd(self::REDIS_PREFIX."sensitive_".self::LEVEL_THREE,array_filter(array_map(function($v) {if(strstr($v['B'],"三") !== false || strstr($v['B'],"3") !== false){return $v['A'];}},$sheetData)));
                     $this->words[self::LEVEL_THREE] = array_filter(array_unique(array_map(function($v) {if(strstr($v['B'],"三") !== false || strstr($v['B'],"3") !== false){return $v['A'];}},$sheetData)));
+
+                    $this->redis->sadd(self::REDIS_PREFIX."sensitive_".self::LEVEL_TWO,array_filter(array_map(function($v) {if(strstr($v['B'],"三") !== false || strstr($v['B'],"3") !== false){return $v['A'];}},$sheetData)));
                     $this->words[self::LEVEL_TWO] = array_filter(array_unique(array_map(function($v) {if(strstr($v['B'],"二") !== false || strstr($v['B'],"2") !== false){return $v['A'];}},$sheetData)));
+
+                    $this->redis->sadd(self::REDIS_PREFIX."sensitive_".self::LEVEL_ONE,array_filter(array_map(function($v) {if(strstr($v['B'],"三") !== false || strstr($v['B'],"3") !== false){return $v['A'];}},$sheetData)));
                     $this->words[self::LEVEL_ONE] = array_filter(array_unique(array_map(function($v) {if(strstr($v['B'],"一") !== false || strstr($v['B'],"1") !== false){return $v['A'];}},$sheetData)));
-                }else{
 
                 }
+                $this->redis->sadd(self::REDIS_PREFIX.self::LOADED_LIB,$file);
+                $this->loadedLib[] = $file;
             }
-            $this->loadedLib[] = $file;
+        }else{
+            $this->words[self::LEVEL_THREE] = $this->redis->smembers(self::REDIS_PREFIX."sensitive_".self::LEVEL_THREE);
+            $this->words[self::LEVEL_TWO] = $this->redis->smembers(self::REDIS_PREFIX."sensitive_".self::LEVEL_TWO);
+            $this->words[self::LEVEL_ONE] = $this->redis->smembers(self::REDIS_PREFIX."sensitive_".self::LEVEL_ONE);
         }
+
     }
 
     public function getLoadedLib()
     {
-        return $this->wordLib ? array_keys($this->wordLib) : [];
+        if($this->redis->exists(self::REDIS_PREFIX.self::LOADED_LIB)){
+            return $this->redis->smembers(self::REDIS_PREFIX.self::LOADED_LIB);
+        }else{
+            return $this->loadedLib;
+        }
+
     }
 
     protected function getLocalLib()
@@ -123,10 +158,15 @@ class SensitiveWord
         if (false != ($handle = opendir ($path))) {
             while ( false !== ($file = readdir ( $handle )) ) {
                 if ($file != "." && $file != ".." && strpos($file,".") && strpos($file,"~") !== 0) {
-                    $this->wordLib[$file]= $path."/".$file;
+                    if(!$this->redis->sismember(self::REDIS_PREFIX.self::LOADED_LIB,$path."/".$file))
+                    {
+                        $this->wordLib[] = $path."/".$file;
+                    }
                 }
             }
+
         }
+
     }
 
 
