@@ -21,6 +21,12 @@
                     "psr-4": {
                         "SensitiveService\\": "src/"
                     }
+                },
+                "require": {
+                    "phpoffice/phpspreadsheet": "*"
+                },
+                "config": {
+                    "secure-http": false
                 }
             }
         }
