@@ -23,10 +23,8 @@
                     }
                 },
                 "require": {
-                    "phpoffice/phpspreadsheet": "*"
-                },
-                "config": {
-                    "secure-http": false
+                    "phpoffice/phpspreadsheet": "*",
+                    "predis/predis": "^1.1"
                 }
             }
         }
@@ -37,6 +35,8 @@
 ```
 composer config secure-http false
 
+composer remove "duanwei/sensitive-word" 
+
 composer require --prefer-dist "duanwei/sensitive-word"
 ```
 
@@ -44,7 +44,7 @@ composer require --prefer-dist "duanwei/sensitive-word"
 ```
 use SensitiveService\SensitiveWord;
 
-$s = SensitiveWord::getInstance();
+$s = SensitiveWord::getInstance(['hostname'=>'127.0.0.1','port'=>'6379','database'=>'0']);
 $s->loadWordLib();  //加载默认词库
 //$s->loadWordLib("/Users/a20170407/Workspace/sensitive-word/lib/three.xlsx");  //加载指定词库文件
 //$s->loadWordLib(__DIR__."/../lib/three.xlsx");  //加载指定词库文件
