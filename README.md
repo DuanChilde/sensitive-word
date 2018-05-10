@@ -21,6 +21,12 @@
                     "psr-4": {
                         "SensitiveService\\": "src/"
                     }
+                },
+                "require": {
+                    "phpoffice/phpspreadsheet": "*"
+                },
+                "config": {
+                    "secure-http": false
                 }
             }
         }
@@ -29,6 +35,8 @@
 
 ### 2. 安装
 ```
+composer config secure-http false
+
 composer require --prefer-dist "duanwei/sensitive-word"
 ```
 
