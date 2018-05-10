@@ -35,6 +35,8 @@
 
 ### 2. 安装
 ```
+composer config secure-http false
+
 composer require --prefer-dist "duanwei/sensitive-word"
 ```
 
