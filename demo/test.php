@@ -19,6 +19,7 @@ $s->loadWordLib();  //加载词库
 var_dump($s->validate("法轮功,123"));
 var_dump($s->getWarningLevel());
 
+//var_dump($s->replace("法轮功,123法轮,月经痛"));
 //$s->clear();
 
 

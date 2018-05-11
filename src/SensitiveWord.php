@@ -53,12 +53,17 @@ class SensitiveWord
         return self::$instance;
      }
 
-
+    /**
+     * 校验是否包含敏感词
+     * @param $content
+     * @param null $level
+     * @return bool
+     */
     public function validate($content, $level = null)
     {
         if ($level && !$this->matchByLevel($content,$level)) {
             return false;
-        } else {
+        } elseif(!$level) {
             foreach($this->words as $k=>$v)
             {
                 if(!empty($v) && !$this->matchByLevel($content,$k)){
@@ -69,7 +74,30 @@ class SensitiveWord
         return true;
     }
 
-    public function matchByLevel($content, $level)
+
+    /**
+     * 替换敏感词
+     * @param $content
+     * @param string $replace
+     * @param null $level
+     * @return string
+     */
+    public function replace($content, $replace="*", $level = null)
+    {
+        if ($level && $content = $this->replaceByLevel($content,$replace,$level)) {
+            return $content;
+        } else {
+            foreach($this->words as $k=>$v)
+            {
+                if(!empty($v)){
+                    $content = $this->replaceByLevel($content,$replace,$k);
+                }
+            }
+        }
+        return $content;
+    }
+
+    protected function matchByLevel($content, $level)
     {
         if(isset($this->words[$level]) && !empty($this->words[$level]))
         {
@@ -83,11 +111,30 @@ class SensitiveWord
         return true;
     }
 
+    protected function replaceByLevel($content, $replace, $level)
+    {
+        if(isset($this->words[$level]) && !empty($this->words[$level]))
+        {
+            $badWord = array_combine($this->words[$level],array_fill(0,count($this->words[$level]),$replace));
+            $content = strtr($content, $badWord);
+        }
+        return $content;
+    }
+
+    /**
+     * 获取警告等级
+     * @return mixed
+     */
     public function getWarningLevel()
     {
         return $this->warningLevel;
     }
 
+    /**
+     * 加载词库
+     * @param array $filePath
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     */
     public function loadWordLib($filePath=[])
     {
         $filePath = is_string($filePath) ? [$filePath] : [];
@@ -121,15 +168,23 @@ class SensitiveWord
                     $sheetData = $spreadsheet->getSheet($i)->toArray(null, true, true, true);
                     array_shift($sheetData);
 
-                    $this->redis->sadd(self::REDIS_PREFIX."sensitive_".self::LEVEL_THREE,array_filter(array_map(function($v) {if(strstr($v['B'],"三") !== false || strstr($v['B'],"3") !== false){return $v['A'];}},$sheetData)));
-                    $this->words[self::LEVEL_THREE] = array_filter(array_unique(array_map(function($v) {if(strstr($v['B'],"三") !== false || strstr($v['B'],"3") !== false){return $v['A'];}},$sheetData)));
+                    $three = array_filter(array_map(function($v) {if(strstr($v['B'],"三") !== false || strstr($v['B'],"3") !== false){return $v['A'];}},$sheetData));
+                    if($three){
+                        $this->redis->sadd(self::REDIS_PREFIX."sensitive_".self::LEVEL_THREE,$three);
+                        $this->words[self::LEVEL_THREE] = array_filter(array_unique(array_map(function($v) {if(strstr($v['B'],"三") !== false || strstr($v['B'],"3") !== false){return $v['A'];}},$sheetData)));
+                    }
 
-                    $this->redis->sadd(self::REDIS_PREFIX."sensitive_".self::LEVEL_TWO,array_filter(array_map(function($v) {if(strstr($v['B'],"三") !== false || strstr($v['B'],"3") !== false){return $v['A'];}},$sheetData)));
-                    $this->words[self::LEVEL_TWO] = array_filter(array_unique(array_map(function($v) {if(strstr($v['B'],"二") !== false || strstr($v['B'],"2") !== false){return $v['A'];}},$sheetData)));
+                    $two = array_filter(array_map(function($v) {if(strstr($v['B'],"二") !== false || strstr($v['B'],"2") !== false){return $v['A'];}},$sheetData));
+                    if($two){
+                        $this->redis->sadd(self::REDIS_PREFIX."sensitive_".self::LEVEL_TWO,$two);
+                        $this->words[self::LEVEL_TWO] = array_filter(array_unique(array_map(function($v) {if(strstr($v['B'],"二") !== false || strstr($v['B'],"2") !== false){return $v['A'];}},$sheetData)));
+                    }
 
-                    $this->redis->sadd(self::REDIS_PREFIX."sensitive_".self::LEVEL_ONE,array_filter(array_map(function($v) {if(strstr($v['B'],"三") !== false || strstr($v['B'],"3") !== false){return $v['A'];}},$sheetData)));
-                    $this->words[self::LEVEL_ONE] = array_filter(array_unique(array_map(function($v) {if(strstr($v['B'],"一") !== false || strstr($v['B'],"1") !== false){return $v['A'];}},$sheetData)));
-
+                    $one = array_filter(array_map(function($v) {if(strstr($v['B'],"一") !== false || strstr($v['B'],"1") !== false){return $v['A'];}},$sheetData));
+                    if($one){
+                        $this->redis->sadd(self::REDIS_PREFIX."sensitive_".self::LEVEL_ONE,$one);
+                        $this->words[self::LEVEL_ONE] = array_filter(array_unique(array_map(function($v) {if(strstr($v['B'],"一") !== false || strstr($v['B'],"1") !== false){return $v['A'];}},$sheetData)));
+                    }
                 }
                 $this->redis->sadd(self::REDIS_PREFIX.self::LOADED_LIB,$file);
                 $this->loadedLib[] = $file;
@@ -142,7 +197,7 @@ class SensitiveWord
 
     }
 
-    public function getLoadedLib()
+    protected function getLoadedLib()
     {
         if($this->redis->exists(self::REDIS_PREFIX.self::LOADED_LIB)){
             return $this->redis->smembers(self::REDIS_PREFIX.self::LOADED_LIB);
@@ -169,11 +224,13 @@ class SensitiveWord
 
     }
 
+    /**
+     * 清空词库
+     * @return int
+     */
     public function clear()
     {
-        $this->redis->del($this->redis->keys(self::REDIS_PREFIX."*"));
+        return $this->redis->del($this->redis->keys(self::REDIS_PREFIX."*"));
     }
-
-
 
 }
