@@ -49,16 +49,21 @@ composer require --prefer-dist "duanwei/sensitive-word"
 ### 3. 使用
 ```
 use SensitiveService\SensitiveWord;
-
+//加载redis缓存配置
 $s = SensitiveWord::getInstance(['hostname'=>'127.0.0.1','port'=>'6379','database'=>'0']);
-$s->loadWordLib();  //加载默认词库
-//$s->loadWordLib("/Users/a20170407/Workspace/sensitive-word/lib/three.xlsx");  //加载指定词库文件
-//$s->loadWordLib(__DIR__."/../lib/three.xlsx");  //加载指定词库文件
-//var_dump($s->validate("法轮功,月经痛",SensitiveWord::LEVEL_THREE));
-//var_dump($s->validate("法轮功,月经痛",SensitiveWord::LEVEL_TWO));
-var_dump($s->validate("法轮功,123"));
-var_dump($s->getWarningLevel());
-//$s->clear();
+//加载默认词库
+$s->loadWordLib();  
+//加载指定词库文件，参数支持数组
+$s->loadWordLib("/Users/a20170407/Workspace/sensitive-word/lib/three.xlsx");  
+$s->loadWordLib(__DIR__."/../lib/three.xlsx");
+//指定等级校验，不指定默认按三级，二级，一级的顺序校验 true|false
+$s->validate("法轮功,月经痛",SensitiveWord::LEVEL_THREE);
+$s->validate("法轮功,月经痛",SensitiveWord::LEVEL_TWO));
+$s->validate("法轮功,123");
+//获取校验等级，返回值为3，2，1，null
+$s->getWarningLevel();
+//清空词库，用于词库更新
+$s->clear();
 
 
 ```
