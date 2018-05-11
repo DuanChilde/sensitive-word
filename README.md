@@ -10,12 +10,16 @@
             "type": "package",
             "package": {
                 "name": "duanwei/sensitive-word",
-                "version": "0.0.1",
+                "version": "0.0.5",
                 "type": "package",
                 "source": {
                     "url": "http://git.tdf.ministudy.com/duanwei/sensitive-word.git",
                     "type": "git",
                     "reference": "master"
+                },
+                "dist": {
+                    "url": "http://git.tdf.ministudy.com/duanwei/sensitive-word/archive/0.0.5.zip",
+                    "type": "zip"
                 },
                 "autoload": {
                     "psr-4": {
@@ -54,7 +58,7 @@ $s = SensitiveWord::getInstance(['hostname'=>'127.0.0.1','port'=>'6379','databas
 //加载默认词库
 $s->loadWordLib();  
 //加载指定词库文件，参数支持数组
-$s->loadWordLib("/Users/a20170407/Workspace/sensitive-word/lib/three.xlsx");  
+$s->loadWordLib("/Users/xxxx/Workspace/sensitive-word/lib/three.xlsx");  
 $s->loadWordLib(__DIR__."/../lib/three.xlsx");
 //指定等级校验，不指定默认按三级，二级，一级的顺序校验 true|false
 $s->validate("法轮功,月经痛",SensitiveWord::LEVEL_THREE);
@@ -64,7 +68,10 @@ $s->validate("法轮功,123");
 $s->getWarningLevel();
 //清空词库，用于词库更新
 $s->clear();
-
+//替换非法字符，默认替换为*好
+var_dump($s->replace("法轮功,123法轮,月经痛"));
+//清空词库
+$s->clear();
 
 ```
 
