@@ -10,7 +10,7 @@
             "type": "package",
             "package": {
                 "name": "duanwei/sensitive-word",
-                "version": "0.0.5",
+                "version": "0.0.7",
                 "type": "package",
                 "source": {
                     "url": "http://git.tdf.ministudy.com/duanwei/sensitive-word.git",
@@ -18,7 +18,7 @@
                     "reference": "master"
                 },
                 "dist": {
-                    "url": "http://git.tdf.ministudy.com/duanwei/sensitive-word/archive/0.0.5.zip",
+                    "url": "http://git.tdf.ministudy.com/duanwei/sensitive-word/archive/0.0.7.zip",
                     "type": "zip"
                 },
                 "autoload": {
@@ -40,14 +40,16 @@
 去除https
 composer config secure-http false
 
-移除
-composer remove "duanwei/sensitive-word" 
+引入
+composer require --prefer-dist "duanwei/sensitive-word"
 
 更新
 composer update "duanwei/sensitive-word" 
 
-引入
-composer require --prefer-dist "duanwei/sensitive-word"
+移除
+composer remove "duanwei/sensitive-word" 
+
+
 ```
 
 ### 3. 使用
