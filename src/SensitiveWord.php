@@ -230,7 +230,10 @@ class SensitiveWord
      */
     public function clear()
     {
-        return $this->redis->del($this->redis->keys(self::REDIS_PREFIX."*"));
+        if($this->redis->keys(self::REDIS_PREFIX."*")){
+            $this->redis->del($this->redis->keys(self::REDIS_PREFIX."*"));
+        }
+        return true;
     }
 
 }
