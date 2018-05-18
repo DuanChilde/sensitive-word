@@ -11,10 +11,6 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use SensitiveService\SensitiveWord;
 
 $s = SensitiveWord::getInstance(['hostname'=>'127.0.0.1','port'=>'6379','database'=>'0']);
-
-$s->clear();die;
-
-
 $s->loadWordLib();  //加载词库
 //$s->loadWordLib("/Users/a20170407/Workspace/sensitive-word/lib/three.xlsx");  //加载指定词库文件
 //$s->loadWordLib(__DIR__."/../lib/three.xlsx");  //加载指定词库文件
