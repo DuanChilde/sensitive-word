@@ -138,7 +138,7 @@ class SensitiveWord
      */
     public function loadWordLib($filePath=[])
     {
-        $filePath = is_string($filePath) ? [$filePath] : [];
+        $filePath = is_string($filePath) ? [$filePath] : $filePath;
         if(!empty($filePath))   //加载自定义敏感词库
         {
             foreach($filePath as $file)
@@ -148,7 +148,6 @@ class SensitiveWord
                 }
                 if(!$this->redis->sismember(self::REDIS_PREFIX.self::LOADED_LIB,$file))
                 {
-                    $this->redis->sadd(self::REDIS_PREFIX.self::LOADED_LIB,$file);
                     $this->wordLib[]= $file;
                 }
             }
