@@ -10,7 +10,7 @@
             "type": "package",
             "package": {
                 "name": "duanwei/sensitive-word",
-                "version": "0.0.8",
+                "version": "0.0.9",
                 "type": "package",
                 "source": {
                     "url": "http://git.tdf.ministudy.com/duanwei/sensitive-word.git",
@@ -18,7 +18,7 @@
                     "reference": "master"
                 },
                 "dist": {
-                    "url": "http://git.tdf.ministudy.com/duanwei/sensitive-word/archive/0.0.8.zip",
+                    "url": "http://git.tdf.ministudy.com/duanwei/sensitive-word/archive/0.0.9.zip",
                     "type": "zip"
                 },
                 "autoload": {
