@@ -56,7 +56,7 @@ composer remove "duanwei/sensitive-word"
 ```
 use SensitiveService\SensitiveWord;
 //加载redis缓存配置
-$s = SensitiveWord::getInstance(['hostname'=>'127.0.0.1','port'=>'6379','database'=>'0']);
+$s = SensitiveWord::getInstance(['host'=>'127.0.0.1','port'=>'6379','database'=>'0']);
 //加载默认词库
 $s->loadWordLib();  
 //加载指定词库文件，参数支持数组
