@@ -36,11 +36,8 @@ class SensitiveWord
         if(!isset($config['hostname']) || !isset($config['port']) || !isset($config['database'])){
             throw new \Exception("请加载redis配置");
         }
-        $this->redis = new Client([
-            'host' => $config['hostname'],
-            'port' => $config['port'],
-            'database' => $config['database'],
-        ]);
+
+        $this->redis = new Client($config);
     }
 
     private function __clone()
