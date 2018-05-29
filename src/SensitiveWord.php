@@ -33,10 +33,6 @@ class SensitiveWord
     private function __construct($config)
     {
         ini_set('memory_limit','-1');
-        if(!isset($config['hostname']) || !isset($config['port']) || !isset($config['database'])){
-            throw new \Exception("请加载redis配置");
-        }
-
         $this->redis = new Client($config);
     }
 
